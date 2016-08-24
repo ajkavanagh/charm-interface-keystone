@@ -37,7 +37,13 @@ class TestKeystoneRequires(unittest.TestCase):
         cls._patched_hook = mock.patch('charms.reactive.hook', mock_hook)
         cls._patched_hook_started = cls._patched_hook.start()
         # force requires to rerun the mock_hook decorator:
-        reload(requires)
+        # try except is Python2/Python3 compatibility as Python3 has moved
+        # reload to importlib.
+        try:
+            reload(requires)
+        except NameError:
+            import importlib
+            importlib.reload(requires)
 
     @classmethod
     def tearDownClass(cls):
@@ -45,7 +51,11 @@ class TestKeystoneRequires(unittest.TestCase):
         cls._patched_hook_started = None
         cls._patched_hook = None
         # and fix any breakage we did to the module
-        reload(requires)
+        try:
+            reload(requires)
+        except NameError:
+            import importlib
+            importlib.reload(requires)
 
     def setUp(self):
         self.kr = requires.KeystoneRequires('some-relation', [])
